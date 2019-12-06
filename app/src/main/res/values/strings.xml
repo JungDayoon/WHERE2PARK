@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">navi_ver2</string>
+    <string name="title_activity_main">어디댈car2</string>
+    <string name="kakao_app_key">b606b252292d90fd8ea774d91d712479</string>
+</resources>
