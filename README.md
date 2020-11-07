@@ -7,5 +7,5 @@
 
 ## 개발환경 및 개발언어
 > Android Studio, Kakao Navigation Open API, Google Maps Open API
-> Raspberry Pi
+> Arduino Uno
 
