@@ -6,6 +6,5 @@
 다가올 스마트 시티에 걸맞는, 주차대수 정보까지 제공공하는 스마트 내비게이션을 개발해보았습니다.
 
 ## 개발환경 및 개발언어
-> Android Studio, Kakao Navigation Open API, Google Maps Open API
-> Arduino Uno
+> Android Studio, Kakao Navigation Open API, Google Maps Open API, Arduino Uno
 
