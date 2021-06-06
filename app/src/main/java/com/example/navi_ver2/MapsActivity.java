@@ -156,32 +156,24 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         KakaoAPI kakaoapi = retrofit.create(KakaoAPI.class);
-        Call<ResultSearchKeyword> call = kakaoapi.getSearchCategory(API_KEY, keyword, "PK6");
+        Call<ResultSearchKeyword> call = kakaoapi.getSearchLocationDetail(API_KEY,
+                Double.toString(parking_latlng.longitude),
+                Double.toString(parking_latlng.latitude),
+                "PK6","distance");
         call.enqueue(new Callback<ResultSearchKeyword>() {
 
             @Override
             public void onResponse(Call<ResultSearchKeyword> call, Response<ResultSearchKeyword> response) {
 
                 Log.d("Test", "Raw : "+ response.raw().toString());
-                List<MarkerInfo> allplace = new ArrayList<>();
                 if(response.body().documents.size()!=0) {
-                    for (int i = 0; i < response.body().documents.size(); i++) {
-                        Place newplace = response.body().documents.get(i);
-                        Double longitude = Double.parseDouble(newplace.x);
-                        Double latitude = Double.parseDouble(newplace.y);
-                        MarkerInfo marker = new MarkerInfo(newplace, getDistance(parking_latlng, new LatLng(latitude, longitude)));
-                        allplace.add(marker);
-                    }
-
-                    Collections.sort(allplace);
-
                     for (int i = 0; i < 3; i++) {
-                        Place newplace = allplace.get(i).p;
+                        Place newplace = response.body().documents.get(i);
                         Double longitude = Double.parseDouble(newplace.x);
                         Double latitude = Double.parseDouble(newplace.y);
                         setpin(i + 1, newplace, longitude, latitude);
                         int DriverChoose = i + 1;
-                        dist[i].setText(String.format("%.2f m", allplace.get(i).distance));
+                        dist[i].setText(String.format("%.2f m", getDistance(new LatLng(latitude, longitude), parking_latlng)));
                         ChoiceButton[i + 1].setText(newplace.place_name);
                         ChoiceButton[i + 1].setOnClickListener(new Button.OnClickListener() {
                             @Override
@@ -430,31 +422,5 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
 
         return distance;
     }
-
-    public class MarkerInfo implements Comparable<MarkerInfo>{
-        Place p;
-        Double distance;
-
-        public MarkerInfo(Place p, double distance) {
-            this.p = p;
-            this.distance = distance;
-        }
-
-        public double getDistance() {
-            return distance;
-        }
-
-        @Override
-        public int compareTo(MarkerInfo o) {
-            if (this.getDistance() > o.getDistance())
-                return 1;
-            else if (this.getDistance() == o.getDistance())
-                return 0;
-            else
-                return -1;
-        }
-    }
-
-
 }
 

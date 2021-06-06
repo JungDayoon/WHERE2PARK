@@ -36,10 +36,6 @@ public class test extends TimerTask {
     //private TextView tv;
 
     Data dataList;
-    private int order =0;
-    boolean[] myParkingLotCondition = new boolean[5];
-    ParkingLotInfo[] myParkingLotInfo = new ParkingLotInfo[3];
-    boolean[] prevParkingLotCondition = new boolean[5];
     int[] col = {1, 7, 9};
     private TextView[] light = new TextView[3];
 
@@ -49,9 +45,7 @@ public class test extends TimerTask {
     APIInterface apiInterface;
     @Override
     public void run() {
-
         final ArrayList<String> value = new ArrayList<>();
-        order++;
         apiInterface = APIClient.getClient().create(APIInterface.class);
         getdata();
     }

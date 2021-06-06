@@ -15,13 +15,13 @@ public interface KakaoAPI {
                                                 @Query("query") String query,
                                                 @Query("category_group_code") String category_group_code);
 
-    //장소이름으로 특정위치기준으로 검색
-    @GET("v2/local/search/keyword.json")
+    //카테고리로 검색
+    @GET("v2/local/search/category.json")
     Call<ResultSearchKeyword> getSearchLocationDetail(
             @Header("Authorization") String token,
-            @Query("query") String query,
             @Query("x") String x,
             @Query("y") String y,
-            @Query("size") int size
+            @Query("category_group_code") String category_group_code,
+            @Query("sort") String sort
     );
 }
