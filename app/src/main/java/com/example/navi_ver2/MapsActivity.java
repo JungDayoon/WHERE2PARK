@@ -117,8 +117,8 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
         }else {
             checkRunTimePermission();
         }
+
         searchKeyword(keyword);
-        searchCategory(keyword);
     }
 
     private void searchKeyword(String keyword){
@@ -133,48 +133,33 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
             @Override
             public void onResponse(Call<ResultSearchKeyword> call, Response<ResultSearchKeyword> response) {
                 Log.d("Test", "Raw : "+ response.raw().toString());
-                for(int i=0;i<1;i++) {
-                    Place newplace = response.body().documents.get(i);
-                    destination2 = newplace;
-                    System.out.println(response.body().documents.get(i).address_name);
-                    System.out.println(response.body().documents.get(i).place_name);
-                    System.out.println(response.body().documents.get(i).road_address_name);
-                    Double longitude = Double.parseDouble(response.body().documents.get(i).x);
-                    Double latitude = Double.parseDouble(response.body().documents.get(i).y);
-                    System.out.println(longitude+" "+ latitude);
-                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude);
-                    mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), true);
-                    MapPOIItem marker = new MapPOIItem();
-                    marker.setItemName(response.body().documents.get(i).place_name);
-                    marker.setTag(i);
-                    marker.setMapPoint(mapPoint);
-                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
-                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
-                    ChoiceButton[0].setText(response.body().documents.get(i).place_name+" 으로 안내하기");
+                Place point = response.body().documents.get(0);
+                Double longitude = Double.parseDouble(response.body().documents.get(0).x);
+                Double latitude = Double.parseDouble(response.body().documents.get(0).y);
 
-                    mapView.addPOIItem(marker);
-                    ChoiceButton[0].setOnClickListener(new Button.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            int DriverChoose = 0;
-                            Log.i("Button", "DriverChoose: " + DriverChoose);
-                            com.kakao.kakaonavi.Location destination = com.kakao.kakaonavi.Location.newBuilder(
-                                    data,
-                                    longitude, latitude).build();
+                setpin(0, point, longitude, latitude);
+                ChoiceButton[0].setText(point.place_name+" 으로 안내하기");
+                ChoiceButton[0].setOnClickListener(new Button.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int DriverChoose = 0;
+                        Log.i("Button", "DriverChoose: " + DriverChoose);
+                        com.kakao.kakaonavi.Location destination = com.kakao.kakaonavi.Location.newBuilder(
+                                data,
+                                longitude, latitude).build();
 
-                            NaviOptions options = NaviOptions.newBuilder().setCoordType(CoordType.WGS84)
-                                    .setVehicleType(VehicleType.FIRST).setRpOption(RpOption.SHORTEST).build();
+                        NaviOptions options = NaviOptions.newBuilder().setCoordType(CoordType.WGS84)
+                                .setVehicleType(VehicleType.FIRST).setRpOption(RpOption.SHORTEST).build();
 
-                            KakaoNaviParams.Builder builder = KakaoNaviParams.newBuilder(destination).setNaviOptions(options);
-                            KakaoNaviParams params = builder.build();
+                        KakaoNaviParams.Builder builder = KakaoNaviParams.newBuilder(destination).setNaviOptions(options);
+                        KakaoNaviParams params = builder.build();
 
-                            KakaoNaviService.getInstance().navigate(MapsActivity.this, builder.build());
+                        KakaoNaviService.getInstance().navigate(MapsActivity.this, builder.build());
 
-                        }
-                    });
-
-                }
-
+                    }
+                });
+                LatLng destination_latlng = new LatLng(latitude, longitude);
+                searchCategory(keyword, destination_latlng);
 
             }
             @Override
@@ -183,14 +168,31 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
             }
         });
     }
-    private void searchCategory(String keyword){
+    void setpin(int pinnum, Place place, Double longitude, Double latitude){
+        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude);
+
+        MapPOIItem marker = new MapPOIItem();
+        marker.setItemName(place.place_name);
+        marker.setTag(pinnum);
+        marker.setMapPoint(mapPoint);
+        if(pinnum == 0) {
+            marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
+            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), true);
+        }
+        else{
+            marker.setMarkerType(MapPOIItem.MarkerType.YellowPin);
+        }
+        marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+        mapView.addPOIItem(marker);
+    }
+    private void searchCategory(String keyword, LatLng parking_latlng){
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         KakaoAPI kakaoapi = retrofit.create(KakaoAPI.class);
-        Call<ResultSearchKeyword> call = kakaoapi.getSearchCategory(API_KEY, keyword, "PK6", 3);
+        Call<ResultSearchKeyword> call = kakaoapi.getSearchCategory(API_KEY, keyword, "PK6");
         call.enqueue(new Callback<ResultSearchKeyword>() {
 
             @Override
@@ -198,22 +200,12 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
                 Log.d("Test", "Raw : "+ response.raw().toString());
                 for(int i=0;i<3;i++) {
                     Place newplace = response.body().documents.get(i);
-                    System.out.println(response.body().documents.get(i).address_name);
-                    System.out.println(response.body().documents.get(i).place_name);
-                    System.out.println(response.body().documents.get(i).road_address_name);
-                    Double longitude = Double.parseDouble(response.body().documents.get(i).x);
-                    Double latitude = Double.parseDouble(response.body().documents.get(i).y);
-                    LatLng parking_latlng = new LatLng(latitude, longitude);
-                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude);
-                    MapPOIItem marker = new MapPOIItem();
-                    marker.setItemName(response.body().documents.get(i).place_name);
-                    marker.setTag(i+1);
-                    marker.setMapPoint(mapPoint);
-                    marker.setMarkerType(MapPOIItem.MarkerType.YellowPin); // 기본으로 제공하는 BluePin 마커 모양.
-                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+                    Double longitude = Double.parseDouble(newplace.x);
+                    Double latitude = Double.parseDouble(newplace.y);
+                    setpin(i+1, newplace, longitude, latitude);
                     int DriverChoose = i+1;
-                    mapView.addPOIItem(marker);
-                    ChoiceButton[i+1].setText(response.body().documents.get(i).place_name);
+                    dist[i].setText(Double.toString(getDistance(parking_latlng, new LatLng(latitude, longitude))));
+                    ChoiceButton[i+1].setText(newplace.place_name);
                     ChoiceButton[i+1].setOnClickListener(new Button.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -230,12 +222,9 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
                             KakaoNaviParams params = builder.build();
 
                             KakaoNaviService.getInstance().navigate(MapsActivity.this, builder.build());
-
                         }
                     });
                 }
-
-
             }
 
             @Override

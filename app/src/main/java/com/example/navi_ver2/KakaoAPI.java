@@ -13,8 +13,7 @@ public interface KakaoAPI {
     @GET("/v2/local/search/keyword.json")
     Call<ResultSearchKeyword> getSearchCategory(@Header("Authorization") String key,
                                                 @Query("query") String query,
-                                                @Query("category_group_code") String category_group_code,
-                                                @Query("size") int size);
+                                                @Query("category_group_code") String category_group_code);
 
     //장소이름으로 특정위치기준으로 검색
     @GET("v2/local/search/keyword.json")
