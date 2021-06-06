@@ -135,17 +135,7 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
                     public void onClick(View view) {
                         int DriverChoose = 0;
                         Log.i("Button", "DriverChoose: " + DriverChoose);
-                        com.kakao.kakaonavi.Location destination = com.kakao.kakaonavi.Location.newBuilder(
-                                data,
-                                longitude, latitude).build();
-
-                        NaviOptions options = NaviOptions.newBuilder().setCoordType(CoordType.WGS84)
-                                .setVehicleType(VehicleType.FIRST).setRpOption(RpOption.SHORTEST).build();
-
-                        KakaoNaviParams.Builder builder = KakaoNaviParams.newBuilder(destination).setNaviOptions(options);
-                        KakaoNaviParams params = builder.build();
-
-                        KakaoNaviService.getInstance().navigate(MapsActivity.this, builder.build());
+                        startnavi(point.place_name, longitude, latitude);
 
                     }
                 });
@@ -158,23 +148,6 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
                 Log.e("Test", "Error");
             }
         });
-    }
-    void setpin(int pinnum, Place place, Double longitude, Double latitude){
-        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude);
-
-        MapPOIItem marker = new MapPOIItem();
-        marker.setItemName(place.place_name);
-        marker.setTag(pinnum);
-        marker.setMapPoint(mapPoint);
-        if(pinnum == 0) {
-            marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
-            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), true);
-        }
-        else{
-            marker.setMarkerType(MapPOIItem.MarkerType.YellowPin);
-        }
-        marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
-        mapView.addPOIItem(marker);
     }
     private void searchCategory(String keyword, LatLng parking_latlng){
 
@@ -215,17 +188,7 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
                             public void onClick(View view) {
                                 Log.i("Button", "DriverChoose: " + DriverChoose);
 
-                                com.kakao.kakaonavi.Location destination = com.kakao.kakaonavi.Location.newBuilder(
-                                        data,
-                                        longitude, latitude).build();
-
-                                NaviOptions options = NaviOptions.newBuilder().setCoordType(CoordType.WGS84)
-                                        .setVehicleType(VehicleType.FIRST).setRpOption(RpOption.SHORTEST).build();
-
-                                KakaoNaviParams.Builder builder = KakaoNaviParams.newBuilder(destination).setNaviOptions(options);
-                                KakaoNaviParams params = builder.build();
-
-                                KakaoNaviService.getInstance().navigate(MapsActivity.this, builder.build());
+                                startnavi(newplace.place_name, longitude, latitude);
                             }
                         });
                     }
@@ -239,6 +202,55 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
         });
     }
 
+    void startnavi(String placename, Double longitude, Double latitude){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        builder.setTitle("안내");
+        builder.setMessage(placename+"으로 안내를 시작하시겠습니까?");
+        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
+            public void onClick(
+                    DialogInterface dialog, int id) {
+                com.kakao.kakaonavi.Location destination = com.kakao.kakaonavi.Location.newBuilder(
+                        data,
+                        longitude, latitude).build();
+
+                NaviOptions options = NaviOptions.newBuilder().setCoordType(CoordType.WGS84)
+                        .setVehicleType(VehicleType.FIRST).setRpOption(RpOption.SHORTEST).build();
+
+                KakaoNaviParams.Builder builder2 = KakaoNaviParams.newBuilder(destination).setNaviOptions(options);
+                KakaoNaviParams params = builder2.build();
+
+                KakaoNaviService.getInstance().navigate(MapsActivity.this, builder2.build());
+
+            }
+        });
+        builder.setNegativeButton("아니오",  new DialogInterface.OnClickListener() {
+            public void onClick(
+                    DialogInterface dialog, int id) {
+                //"아니오" 버튼 클릭시 실행하는 메소드
+                Toast.makeText(getBaseContext(),"안내실패", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.create().show();
+
+    }
+
+    void setpin(int pinnum, Place place, Double longitude, Double latitude){
+        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude);
+
+        MapPOIItem marker = new MapPOIItem();
+        marker.setItemName(place.place_name);
+        marker.setTag(pinnum);
+        marker.setMapPoint(mapPoint);
+        if(pinnum == 0) {
+            marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
+            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), true);
+        }
+        else{
+            marker.setMarkerType(MapPOIItem.MarkerType.YellowPin);
+        }
+        marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin); // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
+        mapView.addPOIItem(marker);
+    }
 
     public boolean checkLocationServicesStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
