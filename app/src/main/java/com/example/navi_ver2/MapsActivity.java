@@ -4,12 +4,9 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +35,9 @@ import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
 
 
@@ -48,18 +47,11 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static java.util.Collections.sort;
-
-
 public class MapsActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapView.MapViewEventListener {
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
     private String data;
-    private Button button;
-    private EditText editText;
-    private TextView textView;
     private Button[] ChoiceButton = new Button[4];
 
-    private int clickflag;
     private TextView[] dist = new TextView[3];
     private static TextView[] light = new TextView[3];
 
@@ -72,7 +64,6 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
     final String BASE_URL = "https://dapi.kakao.com/";
     final String API_KEY = "KakaoAK 42ea0050be8006956ed3ac000f65c165";
 
-    static test task;
     String[] AdditionalInfo = new String[3];
 
     private static final String LOG_TAG = "MainActivity";
@@ -197,33 +188,47 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
 
             @Override
             public void onResponse(Call<ResultSearchKeyword> call, Response<ResultSearchKeyword> response) {
+
                 Log.d("Test", "Raw : "+ response.raw().toString());
-                for(int i=0;i<3;i++) {
-                    Place newplace = response.body().documents.get(i);
-                    Double longitude = Double.parseDouble(newplace.x);
-                    Double latitude = Double.parseDouble(newplace.y);
-                    setpin(i+1, newplace, longitude, latitude);
-                    int DriverChoose = i+1;
-                    dist[i].setText(Double.toString(getDistance(parking_latlng, new LatLng(latitude, longitude))));
-                    ChoiceButton[i+1].setText(newplace.place_name);
-                    ChoiceButton[i+1].setOnClickListener(new Button.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Log.i("Button", "DriverChoose: " + DriverChoose);
+                List<MarkerInfo> allplace = new ArrayList<>();
+                if(response.body().documents.size()!=0) {
+                    for (int i = 0; i < response.body().documents.size(); i++) {
+                        Place newplace = response.body().documents.get(i);
+                        Double longitude = Double.parseDouble(newplace.x);
+                        Double latitude = Double.parseDouble(newplace.y);
+                        MarkerInfo marker = new MarkerInfo(newplace, getDistance(parking_latlng, new LatLng(latitude, longitude)));
+                        allplace.add(marker);
+                    }
 
-                            com.kakao.kakaonavi.Location destination = com.kakao.kakaonavi.Location.newBuilder(
-                                    data,
-                                    longitude, latitude).build();
+                    Collections.sort(allplace);
 
-                            NaviOptions options = NaviOptions.newBuilder().setCoordType(CoordType.WGS84)
-                                    .setVehicleType(VehicleType.FIRST).setRpOption(RpOption.SHORTEST).build();
+                    for (int i = 0; i < 3; i++) {
+                        Place newplace = allplace.get(i).p;
+                        Double longitude = Double.parseDouble(newplace.x);
+                        Double latitude = Double.parseDouble(newplace.y);
+                        setpin(i + 1, newplace, longitude, latitude);
+                        int DriverChoose = i + 1;
+                        dist[i].setText(String.format("%.2f m", allplace.get(i).distance));
+                        ChoiceButton[i + 1].setText(newplace.place_name);
+                        ChoiceButton[i + 1].setOnClickListener(new Button.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Log.i("Button", "DriverChoose: " + DriverChoose);
 
-                            KakaoNaviParams.Builder builder = KakaoNaviParams.newBuilder(destination).setNaviOptions(options);
-                            KakaoNaviParams params = builder.build();
+                                com.kakao.kakaonavi.Location destination = com.kakao.kakaonavi.Location.newBuilder(
+                                        data,
+                                        longitude, latitude).build();
 
-                            KakaoNaviService.getInstance().navigate(MapsActivity.this, builder.build());
-                        }
-                    });
+                                NaviOptions options = NaviOptions.newBuilder().setCoordType(CoordType.WGS84)
+                                        .setVehicleType(VehicleType.FIRST).setRpOption(RpOption.SHORTEST).build();
+
+                                KakaoNaviParams.Builder builder = KakaoNaviParams.newBuilder(destination).setNaviOptions(options);
+                                KakaoNaviParams params = builder.build();
+
+                                KakaoNaviService.getInstance().navigate(MapsActivity.this, builder.build());
+                            }
+                        });
+                    }
                 }
             }
 
@@ -411,8 +416,31 @@ public class MapsActivity extends AppCompatActivity implements MapView.CurrentLo
 
         distance = B.distanceTo(A);
 
-        System.out.println("getdistance: " + distance);
         return distance;
+    }
+
+    public class MarkerInfo implements Comparable<MarkerInfo>{
+        Place p;
+        Double distance;
+
+        public MarkerInfo(Place p, double distance) {
+            this.p = p;
+            this.distance = distance;
+        }
+
+        public double getDistance() {
+            return distance;
+        }
+
+        @Override
+        public int compareTo(MarkerInfo o) {
+            if (this.getDistance() > o.getDistance())
+                return 1;
+            else if (this.getDistance() == o.getDistance())
+                return 0;
+            else
+                return -1;
+        }
     }
 
 
