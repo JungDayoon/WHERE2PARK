@@ -53,7 +53,7 @@ public class test extends TimerTask {
         final ArrayList<String> value = new ArrayList<>();
         order++;
         apiInterface = APIClient.getClient().create(APIInterface.class);
-        setData();
+        getdata();
     }
     private void setData(){
         String msg1= getRandomData(col[0]);
