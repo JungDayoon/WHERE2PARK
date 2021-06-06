@@ -6,58 +6,30 @@
     android:layout_height="match_parent"
     android:id="@+id/layout_main"
     android:orientation="vertical"
-    android:background="@drawable/ggg"
     tools:context="com.example.navi_ver2.MapsActivity"
-
+    android:background="@drawable/ggg"
     >
 
-    <!--    <ImageView-->
-    <!--        android:id="@+id/imageView"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:layout_centerHorizontal="true"-->
-    <!--        android:layout_centerVertical="true"-->
-    <!--        android:scaleType="fitXY"-->
-    <!--        android:src = "@drawable/ggg"-->
-
-
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintHorizontal_bias="0.571"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        app:layout_constraintVertical_bias="0.0" />-->
-
-    <fragment
+    <RelativeLayout
+        android:id="@+id/MapView"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginTop = "70dp"
-        android:layout_weight="50"
-        android:id="@+id/map"
-        tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
-<!--    <Button-->
-<!--        style="?android:attr/borderlessButtonStyle"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:id="@+id/button"-->
-<!--        android:layout_weight="0"-->
-<!--        android:text="버튼"-->
+        android:layout_height="320dp"
+        android:layout_marginTop="80dp"/>
 
-<!--        />-->
     <Button
         style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/desbutton"
-        android:layout_weight="6"
+        android:layout_weight="9"
         android:text="목적지" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="7">
+        android:layout_weight="6"
+        >
 
         <Button
             style="?android:attr/borderlessButtonStyle"
@@ -93,14 +65,12 @@
             android:ellipsize="marquee"
             android:singleLine="true"/>
 
-        ></LinearLayout>
-    />
-
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="7">
+        android:layout_weight="6">
 
         <Button
             style="?android:attr/borderlessButtonStyle"
@@ -134,14 +104,13 @@
             android:ellipsize="marquee"
             android:singleLine="true"/>
 
-        ></LinearLayout>
-    />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="7">
+        android:layout_weight="6">
 
         <Button
             style="?android:attr/borderlessButtonStyle"
@@ -175,8 +144,7 @@
             android:ellipsize="marquee"
             android:singleLine="true"/>
 
-        ></LinearLayout>
-    />
+    </LinearLayout>
 
 
 </LinearLayout>

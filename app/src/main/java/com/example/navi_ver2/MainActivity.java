@@ -1,14 +1,32 @@
 package com.example.navi_ver2;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.example.googlemap.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Timer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,13 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-//                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-//        setContentView(R.layout.activity_maps);
         setContentView(R.layout.activity_main);
-        //editText = (EditText) findViewById(R.id.editText);
         sample_EditText = (EditText) findViewById(R.id.sample_EditText );
         imageButtonn = (ImageButton) findViewById(R.id.imageButton1);
         imageButtonn.setOnClickListener(new View.OnClickListener()
@@ -38,6 +50,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
     }
+
 }

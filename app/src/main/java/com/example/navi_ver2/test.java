@@ -1,18 +1,32 @@
 package com.example.navi_ver2;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
+import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.googlemap.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class test extends TimerTask {
 
@@ -21,144 +35,134 @@ public class test extends TimerTask {
     private RequestQueue queue;
     //private TextView tv;
 
+    Data dataList;
     private int order =0;
     boolean[] myParkingLotCondition = new boolean[5];
-    ParkingLotInfo[] myParkingLotInfo = new ParkingLotInfo[5];
+    ParkingLotInfo[] myParkingLotInfo = new ParkingLotInfo[3];
     boolean[] prevParkingLotCondition = new boolean[5];
-
+    int[] col = {1, 7, 9};
     private TextView[] light = new TextView[3];
 
     public test(Context context){
         this.context = context;
     }
-
+    APIInterface apiInterface;
     @Override
     public void run() {
 
         final ArrayList<String> value = new ArrayList<>();
         order++;
-        //tv = ((Activity)context).findViewById(R.id.tvMain);
-        queue = Volley.newRequestQueue(context);
-        String url = "http://ja03129.cafe24.com/test.html";
+        apiInterface = APIClient.getClient().create(APIInterface.class);
+        setData();
+    }
+    private void setData(){
+        String msg1= getRandomData(col[0]);
+        String msg2= getRandomData(col[1]);
+        String msg3= getRandomData(col[2]);
 
-        final StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-                String[] words = response.split("\n");
-                int check=0;
-//                for(int i = 2;i<5;i++)
-//                {
-//                    prevParkingLotCondition[i] = false;
-//                }
+        String[] array = msg1.split(" ");
+        String[] array2 = msg2.split(" ");
+        String[] array3 = msg3.split(" ");
 
 
-                for(int i=2;i<5;i++)
-                {
-                    System.out.println("prev "+ prevParkingLotCondition[i]);
+        TextView tv1 = ((Activity)context).findViewById(R.id.car1);
+        TextView tv2 = ((Activity)context).findViewById(R.id.car2);
+        TextView tv3 = ((Activity)context).findViewById(R.id.car3);
+
+        Button bt1 = ((Activity)context).findViewById(R.id.button1);
+        Button bt2 = ((Activity)context).findViewById(R.id.button2);
+        Button bt3 = ((Activity)context).findViewById(R.id.button3);
+        ((Activity) context).runOnUiThread(new Runnable() {
+            public void run(){
+                tv1.setText(CountTrue(array)+"/"+array.length);
+                tv2.setText(CountTrue(array2)+"/"+array2.length);
+                tv3.setText(CountTrue(array3)+"/"+array3.length);
+
+                if(CountTrue(array) == array.length){
+                    bt1.setEnabled(false);
                 }
-                for( String wo : words){
-                    if(check!=0&&check!=1){
-                        value.add(wo);
-                    }
-                    else
-                    {
-                        check++;
-                        continue;
-                    }
-
-                    //System.out.println("wo: " + wo);
-                    myParkingLotInfo[check] = new ParkingLotInfo();
-                    //System.out.println("check = " + check);
-                    for(int i = 0;i<wo.length();i++)
-                    {
-                        //System.out.println("한글자 " + wo.charAt(i));
-                        if(wo.charAt(i) == 'y') // 주차가능
-                        {
-                            if(i== 0)//주차장
-                            {
-                                myParkingLotCondition[check] = true;
-                                //System.out.println("주차장" + check + myParkingLotCondition[check]);
-                            }
-                            else//차
-                            {
-                                myParkingLotInfo[check].total++;
-                                myParkingLotInfo[check].empty++;
-                                //System.out.println(myParkingLotInfo[check].empty + " / " + myParkingLotInfo[check].total);
-                            }
-                        }
-                        else if(wo.charAt(i) == 'n')
-                        {
-                            if(i== 0)// 주차장
-                            {
-                                myParkingLotCondition[check] = false;
-                            }
-                            else//차
-                            {
-                                myParkingLotInfo[check].total++;
-                            }
-                        }
-                        else if(wo.charAt(i) == ' ')
-                        {
-                            continue;
-                        }
-                    }
-                    check++;
-                }
-                boolean flag = true;
-                for(int i = 2;i<5;i++)
-                {
-                    System.out.println("prev: " + prevParkingLotCondition[i] + " now: " + myParkingLotCondition[i]);
-                    if(prevParkingLotCondition[i] != myParkingLotCondition[i])
-                    {
-                        flag = false;
-                    }
-                    System.out.println("여부: " + myParkingLotCondition[i] + " 가능대수: "
-                            + myParkingLotInfo[i].empty + " / " + myParkingLotInfo[i].total);
-
-                }
-                System.out.println("flag = " + flag + "order" + order);
-
-                if(!flag && order !=1)
-                {
-                    //새로 띄우기
-//                    MapsActivity.setLightAgain mySetLight = new MapsActivity.setLightAgain();
-//                    mySetLight.setLightAgainFunc();
-                    MapsActivity newMap = new MapsActivity();
-                    newMap.setLightAgainFunc();
-
+                else{
+                    bt1.setEnabled(true);
                 }
 
-                for(int i = 2;i<5;i++)
-                {
-                    prevParkingLotCondition[i] = myParkingLotCondition[i];
+                if(CountTrue(array2) == array2.length){
+                    bt2.setEnabled(false);
+                }
+                else{
+                    bt2.setEnabled(true);
                 }
 
-                //tv.setText(value.toString());
-                System.out.println("value: " + value.toString());
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
+                if(CountTrue(array3) == array3.length){
+                    bt3.setEnabled(false);
+                }
+                else{
+                    bt3.setEnabled(true);
+                }
             }
         });
 
-        stringRequest.setTag(TAG);
-        queue.add(stringRequest);
     }
 
-    public static class ParkingLotInfo
-    {
-        int total;
-        int empty;
+    private void getdata(){
 
-        public ParkingLotInfo()
-        {
-            total = 0;
-            empty = 0;
+
+        Call<Data> call = apiInterface.getData();
+
+        call.enqueue(new Callback<Data>() {
+
+            @Override
+            public void onResponse(Call<Data> call, retrofit2.Response<Data> response) {
+                dataList = response.body();
+                String msg1= dataList.getMsg1();
+                String msg2= dataList.getMsg2();
+                String msg3= dataList.getMsg3();
+
+                Log.d("MainActivity", dataList.getMsg1());
+                String[] array = msg1.split(" ");
+                String[] array2 = msg2.split(" ");
+                String[] array3 = msg3.split(" ");
+
+
+                TextView tv1 = ((Activity)context).findViewById(R.id.car1);
+                TextView tv2 = ((Activity)context).findViewById(R.id.car2);
+                TextView tv3 = ((Activity)context).findViewById(R.id.car3);
+
+                tv1.setText(CountTrue(array)+"/"+array.length);
+                tv2.setText(CountTrue(array2)+"/"+array2.length);
+                tv3.setText(CountTrue(array3)+"/"+array3.length);
+            }
+
+            @Override
+            public void onFailure(Call<Data> call, Throwable t) {
+                Log.d("MainActivity", t.toString());
+
+            }
+        });
+    }
+
+    private String getRandomData(int num){
+        String newstr = "";
+        for(int i=0;i<num;i++){
+            int newnum = (int)(Math.random()*100)%2;
+            if(newnum==0){
+                newstr+="T ";
+            }
+            else{
+                newstr+="F ";
+            }
+
         }
+        return newstr;
+    }
+
+    public int CountTrue(String[] array){
+        int count = 0;
+        for(int i=0;i<array.length;i++){
+            if(array[i].equals("T")){
+                count+=1;
+            }
+        }
+        return count;
     }
 
 
